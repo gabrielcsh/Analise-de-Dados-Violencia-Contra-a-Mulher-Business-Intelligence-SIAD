@@ -9,5 +9,12 @@ Launch Superset Through Docker Compose using the following comands:
 ```
 cd superset
 docker-compose -f docker-compose-non-dev.yml pull
-docker-compose -f docker-compose-non-dev.yml up
+docker-compose -f docker-compose-non-dev.yml up -d
+```
+
+Launch Postgres Database through Docker Compose using the following comands:
+
+```
+cd postgres
+docker-compose up -d
 ```
