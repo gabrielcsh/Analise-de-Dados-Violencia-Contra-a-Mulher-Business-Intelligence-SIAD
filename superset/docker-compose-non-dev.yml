@@ -31,6 +31,8 @@ services:
     restart: unless-stopped
     volumes:
       - redis:/data
+    networks:
+      - pgadmin-postgres-network
 
   db:
     env_file: docker/.env-non-dev
@@ -39,6 +41,8 @@ services:
     restart: unless-stopped
     volumes:
       - db_home:/var/lib/postgresql/data
+    networks:
+      - pgadmin-postgres-network
 
   superset:
     env_file: docker/.env-non-dev
@@ -51,6 +55,8 @@ services:
       - 8088:8088
     depends_on: *superset-depends-on
     volumes: *superset-volumes
+    networks:
+      - pgadmin-postgres-network
 
   superset-init:
     image: *superset-image
@@ -62,6 +68,8 @@ services:
     volumes: *superset-volumes
     healthcheck:
       disable: true
+    networks:
+      - pgadmin-postgres-network
 
   superset-worker:
     image: *superset-image
@@ -74,6 +82,8 @@ services:
     volumes: *superset-volumes
     healthcheck:
       test: ["CMD-SHELL", "celery -A superset.tasks.celery_app:app inspect ping -d celery@$$HOSTNAME"]
+    networks:
+      - pgadmin-postgres-network
 
   superset-worker-beat:
     image: *superset-image
@@ -86,6 +96,8 @@ services:
     volumes: *superset-volumes
     healthcheck:
       disable: true
+    networks:
+      - pgadmin-postgres-network
 
 volumes:
   superset_home:
@@ -94,3 +106,7 @@ volumes:
     external: false
   redis:
     external: false
+
+networks:
+  pgadmin-postgres-network:
+    driver: bridge

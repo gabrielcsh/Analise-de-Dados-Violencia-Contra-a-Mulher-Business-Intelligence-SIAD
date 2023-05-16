@@ -37,6 +37,8 @@ services:
       - "127.0.0.1:6379:6379"
     volumes:
       - redis:/data
+    networks:
+      - pgadmin-postgres-networkss
 
   db:
     env_file: docker/.env
@@ -44,9 +46,11 @@ services:
     container_name: superset_db
     restart: unless-stopped
     ports:
-      - "127.0.0.1:5432:5432"
+      - "127.0.0.1:5432:5435"
     volumes:
       - db_home:/var/lib/postgresql/data
+    networks:
+      - pgadmin-postgres-network
 
   superset:
     env_file: docker/.env
@@ -61,6 +65,8 @@ services:
     volumes: *superset-volumes
     environment:
       CYPRESS_CONFIG: "${CYPRESS_CONFIG}"
+    networks:
+      - pgadmin-postgres-network
 
   superset-websocket:
     container_name: superset_websocket
@@ -70,6 +76,8 @@ services:
       - 8080:8080
     depends_on:
       - redis
+    networks:
+      - pgadmin-postgres-network
     # Mount everything in superset-websocket into container and
     # then exclude node_modules and dist with bogus volume mount.
     # This is necessary because host and container need to have
@@ -102,6 +110,8 @@ services:
       CYPRESS_CONFIG: "${CYPRESS_CONFIG}"
     healthcheck:
       disable: true
+    networks:
+      - pgadmin-postgres-network
 
   superset-node:
     image: node:16
@@ -110,6 +120,8 @@ services:
     env_file: docker/.env
     depends_on: *superset-depends-on
     volumes: *superset-volumes
+    networks:
+      - pgadmin-postgres-network
 
   superset-worker:
     image: *superset-image
@@ -125,6 +137,8 @@ services:
     # Bump memory limit if processing selenium / thumbnails on superset-worker
     # mem_limit: 2038m
     # mem_reservation: 128M
+    networks:
+      - pgadmin-postgres-network
 
   superset-worker-beat:
     image: *superset-image
@@ -137,6 +151,8 @@ services:
     volumes: *superset-volumes
     healthcheck:
       disable: true
+    networks:
+      - pgadmin-postgres-network
 
   superset-tests-worker:
     image: *superset-image
@@ -155,6 +171,8 @@ services:
     volumes: *superset-volumes
     healthcheck:
       test: ["CMD-SHELL", "celery inspect ping -A superset.tasks.celery_app:app -d celery@$$HOSTNAME"]
+    networks:
+      - pgadmin-postgres-network
 
 volumes:
   superset_home:
@@ -163,3 +181,8 @@ volumes:
     external: false
   redis:
     external: false
+
+
+networks:
+  pgadmin-postgres-network:
+    driver: bridge
