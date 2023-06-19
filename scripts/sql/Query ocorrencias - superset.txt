@@ -1,0 +1,11 @@
+SELECT 
+t.referencia, t.ano, t.mes,
+l.pais, l.uf, l.municipio,
+c.descricao as cenario,
+d.descricao as tipo_denuncia,
+f.quantidade_de_ocorrencias
+FROM public.fato_ocorrencia f 
+left join public.dim_tempo t  on f.pk_tempo = t.pk_tempo
+left join public.dim_localidade l on f.pk_localidade = l.pk_localidade
+left join public.dim_tipo_cenario c on f.pk_cenario = c.pk_cenario
+left join public.dim_tipo_denuncia d on f.pk_tipo_denuncia = d.pk_tipo_denuncia
